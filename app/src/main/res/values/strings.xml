@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">InvoiceFlow</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="name">Name</string>
+    <string name="store_name">Store Name</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="create_account">Create Account</string>
+    <string name="default_store_name">Kothari Provision Store</string>
+    
+    <!-- Error Messages -->
+    <string name="error_invalid_email">Invalid email address</string>
+    <string name="error_short_password">Password must be at least 6 characters</string>
+    <string name="error_passwords_dont_match">Passwords don\'t match</string>
+    <string name="error_network_error">Network error. Please try again.</string>
+    <string name="error_auth_failed">Authentication failed</string>
+    
+    <!-- Success Messages -->
+    <string name="success_registration">Account created successfully!</string>
+    <string name="success_login">Login successful!</string>
+</resources>

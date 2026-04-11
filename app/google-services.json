@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "839955467579",
+    "project_id": "ghostgrid-billing",
+    "storage_bucket": "ghostgrid-billing.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:839955467579:android:50abb79779a54911e5fb1e",
+        "android_client_info": {
+          "package_name": "com.ghostgrid.billing"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGKGk8v8vAMQRsRyaDIGiZHR0PeEfr0fA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

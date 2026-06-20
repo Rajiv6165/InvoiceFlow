@@ -1,355 +1,271 @@
-# InvoiceFlow - Multi-Tenant POS & Billing System
+# InvoiceFlow - Smart POS & Billing System
 
-## Phase 1: Foundation Setup ✅ COMPLETE
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Platform](https://img.shields.io/badge/platform-Android-green)
+![Status](https://img.shields.io/badge/status-Production%20Ready-success)
 
-### Overview
-InvoiceFlow is an offline-first Point of Sale (POS) and Billing system tailored for retail shops. This is Phase 1 of the project, establishing the foundational architecture with Firebase backend integration.
-
----
-
-## 📋 What's Implemented in Phase 1
-
-### ✅ Core Features
-- **Multi-Tenant Architecture**: Complete store-based data isolation in Firestore
-- **Firebase Authentication**: Email/password authentication with automatic user-store linking
-- **Offline-First Setup**: Firebase persistence enabled for offline operations
-- **Role-Based Access Control**: Owner and Cashier roles defined
-- **Default Tenant Seeding**: "Kothari Provision Store" configured as default test tenant
-
-### ✅ Technical Stack
-- **Frontend**: Android (Kotlin with Jetpack Compose)
-- **Architecture**: MVVM with Clean Architecture principles
-- **Backend**: Firebase Auth + Cloud Firestore + Firebase Storage
-- **Dependency Injection**: Hilt
-- **Async Operations**: Kotlin Coroutines + Flow
-
-### ✅ Security
-- **Firestore Security Rules**: Multi-tenant isolation enforced at database level
-- **Store ID Validation**: Every document must contain storeId
-- **Role-Based Permissions**: Different access levels for Owner vs Cashier
+A professional, cloud-native Point of Sale and Billing SaaS application 
+built for Indian retail businesses. Powered by Firebase and built with 
+modern Android development practices.
 
 ---
 
-## 🚀 Getting Started
+## ✅ All Phases Complete
 
-### Prerequisites
-1. **Android Studio**: Hedgehog (2023.1.1) or newer
-2. **JDK**: Version 17 or higher
-3. **Android SDK**: API 34 (targetSdkVersion)
-4. **Firebase Account**: Create a Firebase project
-
-### Step 1: Clone/Setup Project
-```bash
-cd "c:\Users\rajiv\OneDrive\Desktop\Projects\Billing System"
-```
-
-### Step 2: Configure Firebase
-
-#### 2.1 Create Firebase Project
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Click "Add Project"
-3. Enter project name (e.g., "InvoiceFlow-pos")
-4. Enable Google Analytics (optional)
-5. Click "Create Project"
-
-#### 2.2 Add Android App to Firebase
-1. In Firebase Console, click "Add app" → Select Android icon
-2. Enter package name: `com.InvoiceFlow.billing`
-3. Download `google-services.json`
-4. **Replace** the placeholder file at:
-   ```
-   app/google-services.json
-   ```
-   with your downloaded file
-
-#### 2.3 Enable Firebase Authentication
-1. In Firebase Console → Authentication → Get Started
-2. Click "Sign-in method" tab
-3. Enable "Email/Password"
-4. Click "Save"
-
-#### 2.4 Create Cloud Firestore Database
-1. In Firebase Console → Firestore Database → Create Database
-2. Start in **test mode** (we'll update rules next)
-3. Choose a location closest to your users
-4. Click "Enable"
-
-#### 2.5 Deploy Firestore Security Rules
-1. Go to Firestore Rules tab
-2. Copy the entire content from `firestore.rules` file in this project
-3. Paste into the Firebase Console rules editor
-4. Click "Publish"
-
-**Alternative**: Use Firebase CLI
-```bash
-firebase deploy --only firestore:rules
-```
-
-### Step 3: Build Configuration
-
-The project is already configured with:
-- Kotlin 1.9.20
-- Jetpack Compose BOM 2023.10.01
-- Firebase BoM 32.6.0
-- Hilt 2.48.1
-- Navigation Compose 2.7.5
-
-No additional configuration needed unless you want to customize versions.
-
-### Step 4: Sync and Build
-
-1. Open project in Android Studio
-2. Click "Sync Project with Gradle Files"
-3. Wait for dependencies to download
-4. Build → Make Project (Ctrl+F9)
-
-### Step 5: Run the App
-
-1. Connect an Android device or start an emulator (API 24+)
-2. Run → Run 'app' (Shift+F10)
-3. App will show splash screen → Login screen
+| Phase | Feature | Status |
+|-------|---------|--------|
+| Phase 1 | Foundation, Auth, Firebase Setup | ✅ Complete |
+| Phase 2 | Inventory Management & POS Engine | ✅ Complete |
+| Phase 3 | Barcode Scanning & PDF Invoices | ✅ Complete |
+| Phase 4 | Analytics Dashboard & Reports | ✅ Complete |
+| Phase 5 | Staff Management & Activity Logs | ✅ Complete |
+| Phase 6 | Subscription System & Super Admin | ✅ Complete |
+| Phase 7 | Premium UI Polish & Performance | ✅ Complete |
+| Phase 8 | Production Deployment Preparation | ✅ Complete |
 
 ---
 
-## 🧪 Testing Phase 1
+## 🚀 Key Features
 
-### Test Registration
-1. Launch app → Tap "Register" link
-2. Fill in details:
-   - **Name**: Your name
-   - **Email**: Valid email (e.g., owner@test.com)
-   - **Password**: Minimum 6 characters
-   - **Confirm Password**: Same as password
-   - **Store Name**: Optional (defaults to "Kothari Provision Store")
-3. Tap "Create Account"
-4. **Expected Result**: 
-   - Account created successfully
-   - Navigate to Home screen
-   - User info card shows: Name, Email, Role=OWNER, Store ID (auto-generated)
+### 💰 Point of Sale
+- Lightning fast barcode scanning using CameraX + ML Kit
+- Smart cart with real-time GST calculation
+- Confetti animation for large transactions
+- Offline billing — works without internet
+- PDF invoice generation and WhatsApp sharing
 
-### Test Login
-1. Sign out from Home screen
-2. Enter registered email and password
-3. Tap "Login"
-4. **Expected Result**: Successfully logged in
+### 📦 Inventory Management
+- Full product CRUD with barcode/SKU support
+- Real-time stock tracking across all devices
+- Low stock alerts and notifications
+- Category-based product organization
+- Bulk CSV export
 
-### Test Offline Mode
-1. Login successfully
-2. Turn off network (airplane mode)
-3. Restart app
-4. **Expected Result**: App still works, can view cached user data
+### 📊 Analytics Dashboard
+- Real-time revenue and transaction metrics
+- Daily, weekly, monthly sales trends
+- Top selling products report
+- Staff performance leaderboard
+- Interactive charts with date range filters
 
-### Verify Firestore Data
-1. Go to Firebase Console → Firestore Database
-2. Check collections:
-   - **Stores/**: Should have one document with your store
-   - **Users/**: Should have one document with your user
-3. Verify structure matches models:
-   ```json
-   Stores/{storeId}: {
-     "storeId": "auto_generated_id",
-     "name": "Kothari Provision Store",
-     "gstRate": 18.0,
-     "currency": "INR",
-     "createdAt": Timestamp(...),
-     "isActive": true
-   }
-   
-   Users/{userId}: {
-     "userId": "firebase_auth_uid",
-     "name": "Your Name",
-     "email": "your@email.com",
-     "role": "OWNER",
-     "storeId": "same_as_above",
-     "createdAt": Timestamp(...)
-   }
-   ```
+### 👥 Staff Management
+- Owner can create and manage cashier accounts
+- Role-based access control (Owner vs Cashier)
+- Activity logging for every action
+- Shift tracking with performance metrics
+- Deactivate/reactivate staff accounts
+
+### 🔐 Subscription System
+- 14-day free trial on registration
+- Three plans: Starter, Professional, Enterprise
+- Beautiful paywall screen with WhatsApp contact
+- Trial countdown banner (green → orange → red)
+- Feature gating based on plan limits
+
+### 🎨 Premium UI
+- Deep Blue and Emerald Green design system
+- Android 12+ Splash Screen API
+- 4-slide animated onboarding flow
+- Skeleton loading animations
+- Real-time offline/sync status indicator
+- Material Design 3 throughout
+
+---
+
+## 🏗️ Technical Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Language | Kotlin |
+| UI Framework | Jetpack Compose |
+| Architecture | MVVM + Clean Architecture |
+| Dependency Injection | Dagger Hilt |
+| Database | Firebase Cloud Firestore |
+| Authentication | Firebase Auth |
+| Storage | Firebase Storage |
+| Async | Kotlin Coroutines + Flow |
+| Barcode Scanning | CameraX + ML Kit |
+| Background Work | WorkManager |
+| Pagination | Paging 3 |
+| PDF Generation | Android PdfDocument API |
+
+---
+
+## 🔐 Security Architecture
+
+- **Multi-tenant isolation** — storeId enforced on every Firestore document
+- **Role-based Firestore rules** — Owners and Cashiers have different permissions
+- **Subscription validation** — expired accounts blocked at database level
+- **Network security config** — HTTPS only, no cleartext traffic
+- **ProGuard** — code obfuscation enabled for release builds
+- **SuperAdmin collection** — completely locked from client apps
 
 ---
 
 ## 📁 Project Structure
+app/src/main/java/com/invoiceflow/billing/
 
-```
-app/src/main/java/com/InvoiceFlow/billing/
-├── di/                          # Dependency Injection (Hilt modules)
-│   ├── FirebaseModule.kt
-│   └── AppModule.kt
-├── model/                       # Data Models
-│   ├── Role.kt                  # OWNER | CASHIER
-│   ├── Store.kt                 # Store document
-│   └── User.kt                  # User document
-├── repository/                  # Repository Layer
-│   ├── BaseRepository.kt
-│   └── AuthRepository.kt        # Auth operations
-├── ui/                          # UI Layer (Jetpack Compose)
+├── di/                    # Hilt dependency injection modules
+
+├── model/                 # Data models
+
+│   ├── User.kt
+
+│   ├── Store.kt
+
+│   ├── Role.kt
+
+│   ├── ReportsModels.kt
+
+│   ├── StaffModels.kt
+
+│   └── SubscriptionStatus.kt
+
+├── repository/            # Data layer
+
+│   ├── AuthRepository.kt
+
+│   ├── ProductRepository.kt
+
+│   ├── ReportsRepository.kt
+
+│   ├── ActivityLogRepository.kt
+
+│   ├── SubscriptionRepository.kt
+
+│   ├── LicenseActivationRepository.kt
+
+│   ├── ProductsPager.kt
+
+│   └── InvoicesPager.kt
+
+├── ui/
+
 │   ├── screens/
-│   │   ├── login/
-│   │   │   └── LoginScreen.kt
-│   │   ├── register/
-│   │   │   └── RegistrationScreen.kt
-│   │   └── home/
-│   │       └── HomeScreen.kt
-│   ├── theme/
-│   │   ├── Color.kt
-│   │   ├── Type.kt
-│   │   └── Theme.kt
-│   └── MainActivity.kt          # Main entry point
-├── util/                        # Utilities
-│   ├── Constants.kt
-│   ├── Result.kt                # Sealed class for results
-│   ├── LocalDataStore.kt        # DataStore wrapper
-│   └── AppUtil.kt
-├── viewmodel/                   # ViewModel Layer
-│   ├── BaseViewModel.kt
-│   └── AuthViewModel.kt         # Auth state management
-└── BillingApplication.kt        # Application class
+
+│   │   ├── login/         # Login + Onboarding
+
+│   │   ├── register/      # Registration
+
+│   │   ├── home/          # Dashboard
+
+│   │   ├── inventory/     # Product management
+
+│   │   ├── pos/           # POS + Cart
+
+│   │   ├── analytics/     # Reports & charts
+
+│   │   ├── staff/         # Staff management
+
+│   │   ├── profile/       # Settings
+
+│   │   ├── barcode/       # Scanner
+
+│   │   └── main/          # Navigation + Offline banner
+
+│   └── theme/             # Design system
+
+├── util/                  # Helpers
+
+│   ├── PdfGeneratorUtil.kt
+
+│   ├── NetworkMonitor.kt
+
+│   ├── BackgroundSyncWorker.kt
+
+│   └── LocalDataStore.kt
+
+└── viewmodel/             # ViewModels for all screens
+
+---
+
+## ⚙️ Setup & Installation
+
+### Prerequisites
+- Android Studio Hedgehog or newer
+- JDK 17+
+- Android SDK API 34
+- Firebase Account
+
+### Step 1: Clone Repository
+```bash
+git clone https://github.com/Rajiv6165/InvoiceFlow.git
+cd InvoiceFlow
 ```
 
-**Resource Files:**
-```
-app/src/main/res/
-├── values/
-│   ├── strings.xml
-│   ├── colors.xml
-│   └── themes.xml
-└── xml/
-    ├── backup_rules.xml
-    └── data_extraction_rules.xml
-```
+### Step 2: Configure Firebase
+1. Go to [Firebase Console](https://console.firebase.google.com)
+2. Create new project
+3. Add Android app with package: `com.invoiceflow.billing`
+4. Download `google-services.json`
+5. Place in `app/` folder
 
----
+### Step 3: Enable Firebase Services
+- Authentication → Email/Password
+- Firestore Database → Create database
+- Deploy `firestore.rules` from this repo
 
-## 🔐 Firestore Security Rules Summary
+### Step 4: Build & Run
+```bash
+# Sync dependencies
+File → Sync Project with Gradle Files
 
-The deployed rules ensure:
-
-1. **Store Isolation**: Users can only read their own store's data
-2. **User Document Access**: Users can only read/update their own profile
-3. **Product Access**: Only users from same store can read products
-4. **Invoice Creation**: Any authenticated user from store can create invoices
-5. **No Cross-Tenant Access**: Impossible to query another store's data
-
-Example rule enforcement:
-```javascript
-// User cannot read products from different store
-match /Products/{productId} {
-  allow read: if request.auth != null &&
-                 resource.data.storeId == getUserStoreId();
-}
+# Run on device
+Run → Run 'app'
 ```
 
 ---
 
-## 🎯 Key Architectural Decisions
+## 🧪 Testing
 
-### 1. Multi-Tenancy Strategy
-- **Approach**: Database-level isolation using storeId field
-- **Benefit**: Single database, logical separation, cost-effective
-- **Security**: Enforced via Firestore security rules
+See `FINAL_TESTING_CHECKLIST.md` for the complete pre-launch testing guide.
 
-### 2. Offline-First Design
-- Firebase Persistence enabled by default
-- Cache size set to UNLIMITED (100MB)
-- Automatic sync when network returns
-
-### 3. Auto-Generated Store ID
-- Each new registration creates unique storeId
-- First user automatically becomes OWNER
-- Store document created before user document
-
-### 4. Clean Architecture
-- **UI Layer**: Compose screens + ViewModels
-- **Domain Layer**: Use cases (to be added in Phase 2)
-- **Data Layer**: Repositories + Firebase sources
+Key test areas:
+- Register new store and verify Firestore data
+- Complete full POS transaction with barcode scan
+- Test PDF invoice generation and WhatsApp share
+- Verify analytics show correct data
+- Create cashier and test role restrictions
+- Test offline mode with airplane mode
+- Verify subscription trial countdown
 
 ---
 
-## ⚠️ Known Limitations (Phase 1)
+## 🚀 Deployment
 
-1. **No Email Verification**: Users can login immediately after registration
-2. **No Password Reset UI**: Available in repo but not exposed in UI
-3. **Single User Per Store**: Phase 2 will add cashier creation by owner
-4. **No Store Settings Management**: Basic store creation only
+See `DEPLOYMENT_GUIDE.md` for complete Play Store submission guide.
 
-These will be addressed in upcoming phases.
-
----
-
-## 📦 Next Steps (Phase 2)
-
-Phase 2 will implement:
-- ✅ Inventory Management (Product CRUD)
-- ✅ Barcode Scanning
-- ✅ Shopping Cart & Billing
-- ✅ Invoice Generation & Storage
-- ✅ PDF Receipt Generation
-- ✅ GST Calculation
-- ✅ Sales Reports Dashboard
+Key steps:
+1. Generate signing keystore
+2. Configure `local.properties` with signing details
+3. Build release AAB
+4. Submit to Google Play Console
 
 ---
 
-## 🐛 Troubleshooting
+## 📄 Legal
 
-### Build Errors
-**Problem**: "google-services.json not found"
-**Solution**: Replace placeholder file with actual Firebase config
-
-**Problem**: "FirebaseAuth cannot be resolved"
-**Solution**: Sync Gradle files, check internet connection
-
-### Runtime Errors
-**Problem**: "Permission denied" in Firestore
-**Solution**: Ensure security rules are published correctly
-
-**Problem**: "Network error" on login
-**Solution**: Check internet permission in manifest, verify network connectivity
-
-### Firebase Issues
-**Problem**: "App not registered with Firebase"
-**Solution**: Verify package name matches in Firebase Console
-
-**Problem**: "Authentication failed"
-**Solution**: Enable Email/Password sign-in method in Firebase Auth
+- `privacy_policy.html` — Required for Play Store
+- `terms_of_service.html` — Terms of use
+- See `STORE_LISTING.md` for Play Store metadata
 
 ---
 
-## 📞 Support
+## 🏪 Play Store
 
-For issues or questions:
-1. Check Firebase Console logs
-2. Review Logcat output (filter: "InvoiceFlow" or "Firebase")
-3. Verify firestore.rules syntax
-4. Ensure all dependencies are synced
-
----
-
-## 📄 License
-
-This project is proprietary software. All rights reserved.
+**App Name:** InvoiceFlow - POS & Billing  
+**Package:** com.invoiceflow.billing  
+**Version:** 1.0.0  
+**Target SDK:** 34  
+**Min SDK:** 24 (Android 7.0+)
 
 ---
 
-## ✅ Phase 1 Completion Checklist
+## 📞 Contact & Support
 
-- [x] MVVM project structure created
-- [x] Firebase modules configured
-- [x] Firestore security rules deployed
-- [x] Data models implemented (User, Store, Role)
-- [x] AuthRepository with Firebase integration
-- [x] AuthViewModel with state management
-- [x] Login Screen (Compose)
-- [x] Registration Screen (Compose)
-- [x] Home Screen (Compose)
-- [x] Navigation setup
-- [x] Offline persistence enabled
-- [x] Default tenant seeding logic
-- [x] README documentation
+For licensing and business inquiries contact via WhatsApp.
 
 ---
 
-**Phase 1 Status**: ✅ COMPLETE  
-**Ready for**: Phase 2 - Inventory Management & POS UI
-
----
-
-*Last Updated: March 15, 2026*
+*Built with ❤️ for Indian retail businesses*
+*© 2026 InvoiceFlow. All rights reserved.*

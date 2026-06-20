@@ -26,6 +26,7 @@ fun BarcodeScannerDialog(
 ) {
     val context = LocalContext.current
     var showScanner by remember { mutableStateOf(false) }
+    var showPermissionDeniedDialog by remember { mutableStateOf(false) }
     
     // Camera permission launcher
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -34,17 +35,7 @@ fun BarcodeScannerDialog(
         if (isGranted) {
             showScanner = true
         } else {
-            // Show permission denied message
-            AlertDialog(
-                onDismissRequest = onDismiss,
-                title = { Text("Permission Required") },
-                text = { Text("Camera permission is required to scan barcodes. Please grant the permission in app settings.") },
-                confirmButton = {
-                    Button(onClick = onDismiss) {
-                        Text("OK")
-                    }
-                }
-            )
+            showPermissionDeniedDialog = true
         }
     }
     
@@ -135,5 +126,24 @@ fun BarcodeScannerDialog(
                 }
             }
         }
+    }
+
+    if (showPermissionDeniedDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showPermissionDeniedDialog = false
+                onDismiss()
+            },
+            title = { Text("Permission Required") },
+            text = { Text("Camera permission is required to scan barcodes. Please grant the permission in app settings.") },
+            confirmButton = {
+                Button(onClick = {
+                    showPermissionDeniedDialog = false
+                    onDismiss()
+                }) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }

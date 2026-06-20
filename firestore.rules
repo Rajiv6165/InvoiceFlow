@@ -2,56 +2,88 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper function to check if user belongs to store
-    function isStoreMember(storeId) {
-      return request.auth != null && 
-             get(/databases/$(database)/documents/Users/$(request.auth.uid)).data.storeId == storeId;
+    function isAuthenticated() {
+      return request.auth != null;
     }
     
-    // Helper function to get user's storeId
-    function getUserStoreId() {
-      return get(/databases/$(database)/documents/Users/$(request.auth.uid)).data.storeId;
+    function getUserData() {
+      return get(/databases/$(database)/documents/Users/$(request.auth.uid)).data;
     }
     
-    // Stores collection - read-only for members, no client-side writes
+    function isOwner() {
+      return getUserData().role == 'OWNER';
+    }
+    
+    function belongsToStore(storeId) {
+      return getUserData().storeId == storeId;
+    }
+    
+    function isActiveUser() {
+      return getUserData().isActive == true;
+    }
+    
+    function hasValidSubscription(storeId) {
+      let store = get(/databases/$(database)/documents/Stores/$(storeId)).data;
+      return store.subscriptionStatus in ['trial', 'active'];
+    }
+    
+    // Stores - owners can read their own store
     match /Stores/{storeId} {
-      allow read: if isStoreMember(storeId);
-      allow write: if false; // Only admins via cloud functions or server SDK
+      allow read: if isAuthenticated() && belongsToStore(storeId) 
+                     && isActiveUser();
+      allow write: if isAuthenticated() && isOwner() 
+                      && belongsToStore(storeId);
     }
     
-    // Users collection - users can read their own profile and update limited fields
+    // Users - each user reads own doc, owners read store users
     match /Users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && 
-                      request.resource.data.storeId == getUserStoreId();
-      allow update: if request.auth != null && 
-                      request.auth.uid == userId &&
-                      request.resource.data.storeId == resource.data.storeId;
+      allow read: if isAuthenticated() && 
+                     (request.auth.uid == userId || 
+                      (isOwner() && belongsToStore(resource.data.storeId)));
+      allow create: if isAuthenticated() && isOwner();
+      allow update: if isAuthenticated() && 
+                       (request.auth.uid == userId || isOwner());
       allow delete: if false;
     }
     
-    // Products collection - store-based isolation
+    // Products - store members can read, owners can write
     match /Products/{productId} {
-      allow read: if request.auth != null &&
-                     resource.data.storeId == getUserStoreId();
-      allow create: if request.auth != null &&
-                       request.resource.data.storeId == getUserStoreId();
-      allow update, delete: if false; // Owner-only via additional role checks
+      allow read: if isAuthenticated() 
+                     && belongsToStore(resource.data.storeId)
+                     && isActiveUser()
+                     && hasValidSubscription(resource.data.storeId);
+      allow create: if isAuthenticated() && isOwner()
+                       && request.resource.data.storeId == getUserData().storeId;
+      allow update: if isAuthenticated() && isOwner()
+                       && resource.data.storeId == getUserData().storeId;
+      allow delete: if isAuthenticated() && isOwner()
+                       && resource.data.storeId == getUserData().storeId;
     }
     
-    // Invoices collection - cashier can create, owner can read all store invoices
+    // Invoices - any store member can create, owner can read all
     match /Invoices/{invoiceId} {
-      allow read: if request.auth != null &&
-                     resource.data.storeId == getUserStoreId();
-      allow create: if request.auth != null &&
-                       request.resource.data.storeId == getUserStoreId();
+      allow read: if isAuthenticated() 
+                     && belongsToStore(resource.data.storeId)
+                     && isActiveUser();
+      allow create: if isAuthenticated()
+                       && belongsToStore(request.resource.data.storeId)
+                       && isActiveUser()
+                       && hasValidSubscription(request.resource.data.storeId);
       allow update, delete: if false;
     }
     
-    // Settings collection per store
-    match /StoreSettings/{storeId} {
-      allow read: if isStoreMember(storeId);
-      allow write: if false; // Owner-only via additional role checks
+    // Activity Logs - create by any active user, read by owner only
+    match /ActivityLogs/{storeId}/logs/{logId} {
+      allow read: if isAuthenticated() && isOwner() 
+                     && belongsToStore(storeId);
+      allow create: if isAuthenticated() && belongsToStore(storeId)
+                       && isActiveUser();
+      allow update, delete: if false;
+    }
+    
+    // SuperAdmin - completely locked from client app
+    match /SuperAdmin/{document=**} {
+      allow read, write: if false;
     }
   }
 }

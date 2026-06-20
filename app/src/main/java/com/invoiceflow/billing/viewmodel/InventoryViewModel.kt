@@ -6,9 +6,7 @@ import com.invoiceflow.billing.repository.ProductRepository
 import com.invoiceflow.billing.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,7 +30,10 @@ data class InventoryUiState(
  */
 @HiltViewModel
 class InventoryViewModel @Inject constructor(
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val activityLogRepository: com.invoiceflow.billing.repository.ActivityLogRepository,
+    private val authRepository: com.invoiceflow.billing.repository.AuthRepository,
+    private val subscriptionRepository: com.invoiceflow.billing.repository.SubscriptionRepository
 ) : BaseViewModel() {
     
     companion object {
@@ -183,25 +184,46 @@ class InventoryViewModel @Inject constructor(
                     updatedAt = com.google.firebase.Timestamp.now()
                 )
                 
-                productRepository.updateProduct(updatedProduct)
-                    .collect { result ->
-                        when (result) {
-                            is Result.Success -> {
-                                _uiState.value = currentState.copy(
-                                    showAddEditDialog = false,
-                                    editingProduct = null,
-                                    successMessage = "Product updated successfully!"
+                val result = productRepository.updateProduct(updatedProduct)
+                when (result) {
+                    is Result.Success -> {
+                        viewModelScope.launch {
+                            val user = authRepository.getCurrentUser()
+                            activityLogRepository.logEvent(
+                                storeId = currentStoreId,
+                                userId = user?.userId ?: "",
+                                userName = user?.name ?: "Owner",
+                                userEmail = user?.email ?: "",
+                                actionType = "PRODUCT_UPDATED",
+                                details = mapOf(
+                                    "productId" to updatedProduct.productId,
+                                    "productName" to updatedProduct.name
                                 )
-                            }
-                            is Result.Error -> {
-                                _uiState.value = currentState.copy(
-                                    errorMessage = result.message ?: "Error updating product"
-                                )
-                            }
-                            else -> {}
+                            )
                         }
+                        _uiState.value = currentState.copy(
+                            showAddEditDialog = false,
+                            editingProduct = null,
+                            successMessage = "Product updated successfully!"
+                        )
                     }
+                    is Result.Error -> {
+                        _uiState.value = currentState.copy(
+                            errorMessage = result.message ?: "Error updating product"
+                        )
+                    }
+                    else -> {}
+                }
             } else {
+                // Check product limit first
+                val isWithinLimit = subscriptionRepository.isWithinProductLimit(currentStoreId)
+                if (!isWithinLimit) {
+                    _uiState.value = currentState.copy(
+                        errorMessage = "Product limit reached for your current plan. Please upgrade your plan."
+                    )
+                    return@launch
+                }
+
                 // Add new product
                 val newProduct = Product(
                     storeId = currentStoreId,
@@ -215,23 +237,35 @@ class InventoryViewModel @Inject constructor(
                     gstRate = gstRate
                 )
                 
-                productRepository.addProduct(newProduct)
-                    .collect { result ->
-                        when (result) {
-                            is Result.Success -> {
-                                _uiState.value = currentState.copy(
-                                    showAddEditDialog = false,
-                                    successMessage = "Product added successfully!"
+                val result = productRepository.addProduct(newProduct)
+                when (result) {
+                    is Result.Success -> {
+                        viewModelScope.launch {
+                            val user = authRepository.getCurrentUser()
+                            activityLogRepository.logEvent(
+                                storeId = currentStoreId,
+                                userId = user?.userId ?: "",
+                                userName = user?.name ?: "Owner",
+                                userEmail = user?.email ?: "",
+                                actionType = "PRODUCT_ADDED",
+                                details = mapOf(
+                                    "productId" to result.data,
+                                    "productName" to newProduct.name
                                 )
-                            }
-                            is Result.Error -> {
-                                _uiState.value = currentState.copy(
-                                    errorMessage = result.message ?: "Error adding product"
-                                )
-                            }
-                            else -> {}
+                            )
                         }
+                        _uiState.value = currentState.copy(
+                            showAddEditDialog = false,
+                            successMessage = "Product added successfully!"
+                        )
                     }
+                    is Result.Error -> {
+                        _uiState.value = currentState.copy(
+                            errorMessage = result.message ?: "Error adding product"
+                        )
+                    }
+                    else -> {}
+                }
             }
         }
     }
@@ -243,22 +277,31 @@ class InventoryViewModel @Inject constructor(
         viewModelScope.launch {
             val currentState = _uiState.value
             
-            productRepository.deleteProduct(productId)
-                .collect { result ->
-                    when (result) {
-                        is Result.Success -> {
-                            _uiState.value = currentState.copy(
-                                successMessage = "Product deleted successfully!"
-                            )
-                        }
-                        is Result.Error -> {
-                            _uiState.value = currentState.copy(
-                                errorMessage = result.message ?: "Error deleting product"
-                            )
-                        }
-                        else -> {}
+            val result = productRepository.deleteProduct(productId)
+            when (result) {
+                is Result.Success -> {
+                    viewModelScope.launch {
+                        val user = authRepository.getCurrentUser()
+                        activityLogRepository.logEvent(
+                            storeId = currentStoreId,
+                            userId = user?.userId ?: "",
+                            userName = user?.name ?: "Owner",
+                            userEmail = user?.email ?: "",
+                            actionType = "PRODUCT_DELETED",
+                            details = mapOf("productId" to productId)
+                        )
                     }
+                    _uiState.value = currentState.copy(
+                        successMessage = "Product deleted successfully!"
+                    )
                 }
+                is Result.Error -> {
+                    _uiState.value = currentState.copy(
+                        errorMessage = result.message ?: "Error deleting product"
+                    )
+                }
+                else -> {}
+            }
         }
     }
     

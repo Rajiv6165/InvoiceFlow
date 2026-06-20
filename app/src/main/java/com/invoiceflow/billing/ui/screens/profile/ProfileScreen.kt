@@ -1,8 +1,13 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.invoiceflow.billing.ui.screens.profile
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,14 +21,15 @@ import com.invoiceflow.billing.model.User
 @Composable
 fun ProfileScreen(
     user: User,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
     
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Profile & Settings") },
+                title = { Text("Profile") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
@@ -106,34 +112,45 @@ fun ProfileScreen(
                 }
             }
             
-            // Store Info Card (Placeholder for Phase 3)
+            // Store Settings Row Click Card
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToSettings() },
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Store Settings",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    Divider()
-                    
-                    Text(
-                        text = "Store configuration will be available in Phase 3",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                    
-                    // Placeholder info
-                    InfoItem(text = "• Store name and address")
-                    InfoItem(text = "• GST/Tax configuration")
-                    InfoItem(text = "• Logo and branding")
-                    InfoItem(text = "• Business hours")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Column {
+                            Text(
+                                text = "Advanced Settings",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "GST, receipt sizing, backup & notifications",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                    Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null)
                 }
             }
             
@@ -147,7 +164,7 @@ fun ProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        text = "Coming Soon",
+                        text = "System Status",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -155,15 +172,15 @@ fun ProfileScreen(
                     Divider()
                     
                     Text(
-                        text = "Additional features in upcoming phases:",
+                        text = "Additional features currently active:",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     
                     InfoItem(text = "📊 Sales Reports & Analytics")
                     InfoItem(text = "👥 Staff Management")
                     InfoItem(text = "🎫 Discount & Promotions")
-                    InfoItem(text = "☁️ Backup & Sync")
-                    InfoItem(text = "🖨️ PDF Invoice Generation")
+                    InfoItem(text = "☁️ Backup & Sync Active")
+                    InfoItem(text = "🖨️ PDF Invoice Generation Ready")
                 }
             }
             
@@ -171,7 +188,7 @@ fun ProfileScreen(
             
             // App Version
             Text(
-                text = "InvoiceFlow POS v2.0.0\nPhase 2 - Inventory & POS",
+                text = "InvoiceFlow POS v3.0.0\nPhase 7 - Production Grade Polish",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center

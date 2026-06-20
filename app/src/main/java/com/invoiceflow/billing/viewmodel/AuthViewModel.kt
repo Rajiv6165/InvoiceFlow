@@ -41,13 +41,31 @@ data class RegistrationUiState(
     val navigateToHome: Boolean = false
 )
 
+import com.invoiceflow.billing.util.LocalDataStore
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+
 /**
  * ViewModel for handling authentication logic
  */
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val localDataStore: LocalDataStore
 ) : BaseViewModel() {
+    
+    val isOnboardingCompleted = localDataStore.onboardingCompletedFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+        
+    fun completeOnboarding() {
+        viewModelScope.launch {
+            localDataStore.saveOnboardingCompleted(true)
+        }
+    }
     
     companion object {
         private const val TAG = "AuthViewModel"
@@ -242,6 +260,27 @@ class AuthViewModel @Inject constructor(
                 }
             }
         }
+    }
+    
+    /**
+     * Check if user is logged in
+     */
+    fun isLoggedIn(): Boolean {
+        return authRepository.isLoggedIn()
+    }
+    
+    /**
+     * Get current user from repository
+     */
+    suspend fun getCurrentUser(): User? {
+        return authRepository.getCurrentUser()
+    }
+    
+    /**
+     * Observe auth state changes
+     */
+    fun observeAuthState(): kotlinx.coroutines.flow.Flow<com.google.firebase.auth.FirebaseUser?> {
+        return authRepository.observeAuthState()
     }
     
     /**

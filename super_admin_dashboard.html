@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InvoiceFlow | Super Admin Command Center</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #0B0F17;
+      --bg-card: #151C2C;
+      --bg-input: #1D263B;
+      --primary: #3B82F6;
+      --primary-hover: #2563EB;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --text-main: #F3F4F6;
+      --text-muted: #9CA3AF;
+      --border: #2D3748;
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-display);
+      font-weight: 700;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* Auth Wrapper */
+    #auth-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(11, 15, 23, 0.95);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--success));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(to right, #ffffff, #9ca3af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .auth-title {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .auth-subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .form-control {
+      width: 100%;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: white;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 14px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--border);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-input);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #dc2626;
+    }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 14px;
+      margin-top: 16px;
+      min-height: 20px;
+    }
+
+    /* Main Dashboard Layout */
+    #dashboard-layout {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .admin-badge {
+      background-color: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: var(--primary);
+      font-size: 12px;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .admin-email {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Dashboard Container */
+    .dashboard-container {
+      padding: 40px;
+      flex-grow: 1;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      width: 100%;
+      background: linear-gradient(to right, transparent, transparent);
+    }
+
+    .stat-card.primary::after { background: linear-gradient(to right, var(--primary), var(--success)); }
+    .stat-card.success::after { background: linear-gradient(to right, var(--success), #34d399); }
+    .stat-card.warning::after { background: linear-gradient(to right, var(--warning), #fbbf24); }
+    .stat-card.danger::after { background: linear-gradient(to right, var(--danger), #f87171); }
+
+    .stat-title {
+      color: var(--text-muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .stat-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* Management Control Section */
+    .management-panel {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .panel-title {
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .panel-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .search-wrapper {
+      position: relative;
+      flex-grow: 1;
+    }
+
+    .search-input {
+      width: 100%;
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px 12px 40px;
+      color: white;
+      font-size: 14px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .filter-select {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border);
+      color: white;
+      border-radius: 12px;
+      padding: 0 16px;
+      height: 45px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Client Grid / Table */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background-color: var(--bg-dark);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: rgba(21, 28, 44, 0.8);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .store-name-cell {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .store-id-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: monospace;
+      margin-top: 2px;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .badge-trial { background-color: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+    .badge-active { background-color: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .badge-expired { background-color: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+    .badge-suspended { background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    .badge-starter { background-color: rgba(156, 163, 175, 0.1); color: #e5e7eb; border: 1px solid rgba(156, 163, 175, 0.2); }
+    .badge-professional { background-color: rgba(59, 130, 246, 0.1); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.2); }
+    .badge-enterprise { background-color: rgba(229, 169, 59, 0.1); color: #e5a93b; border: 1px solid rgba(229, 169, 59, 0.2); }
+
+    .date-label {
+      font-size: 13px;
+    }
+
+    .empty-state {
+      padding: 80px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 650px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: white;
+    }
+
+    .modal-body {
+      padding: 32px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 24px 32px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+    }
+
+    /* Tabs inside Modal */
+    .modal-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px 16px;
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 14px;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: white;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: var(--primary);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    .notes-display {
+      background-color: rgba(255, 255, 255, 0.03);
+      border: 1px dashed var(--border);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 250px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 16px 24px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toast.active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--danger); }
+  </style>
+</head>
+<body>
+
+  <!-- Auth Guard overlay -->
+  <div id="auth-overlay">
+    <div class="auth-card">
+      <div class="logo-container">
+        <div class="logo-icon">IF</div>
+        <div class="logo-text">InvoiceFlow</div>
+      </div>
+      <h2 class="auth-title">Super Admin</h2>
+      <p class="auth-subtitle">SaaS Billing & License Management Control Room</p>
+      
+      <form id="login-form">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="login-email" class="form-control" placeholder="admin@invoiceflow.com" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" id="login-submit-btn">ACCESS COMMAND CENTER</button>
+      </form>
+      <div id="auth-error" class="error-msg"></div>
+    </div>
+  </div>
+
+  <!-- Dashboard layout -->
+  <div id="dashboard-layout">
+    <header>
+      <div class="header-left">
+        <div class="logo-container" style="margin-bottom: 0;">
+          <div class="logo-icon" style="width: 32px; height: 32px; font-size: 16px; border-radius: 8px;">IF</div>
+          <div class="logo-text" style="font-size: 20px;">InvoiceFlow</div>
+        </div>
+        <span class="admin-badge">GLOBAL SUPER ADMIN</span>
+      </div>
+      <div class="header-right">
+        <span class="admin-email" id="admin-user-email">admin@invoiceflow.com</span>
+        <button class="btn btn-secondary" id="logout-btn" style="padding: 8px 16px; font-size: 13px;">Sign Out</button>
+      </div>
+    </header>
+
+    <main class="dashboard-container">
+      
+      <!-- Stats Grid -->
+      <section class="stats-grid">
+        <div class="stat-card primary">
+          <span class="stat-title">Total Store tenants</span>
+          <span class="stat-value" id="stat-total-stores">-</span>
+          <span class="stat-desc">Registered POS tenants</span>
+        </div>
+        <div class="stat-card success">
+          <span class="stat-title">Estimated Monthly Revenue (MRR)</span>
+          <span class="stat-value" id="stat-mrr">₹0</span>
+          <span class="stat-desc">Based on active plans pricing</span>
+        </div>
+        <div class="stat-card success">
+          <span class="stat-title">Active Licenses</span>
+          <span class="stat-value" id="stat-active-licenses">-</span>
+          <span class="stat-desc">Subscribing clients</span>
+        </div>
+        <div class="stat-card warning">
+          <span class="stat-title">Free Trials</span>
+          <span class="stat-value" id="stat-trial-stores">-</span>
+          <span class="stat-desc">Stores in 14-day evaluation</span>
+        </div>
+        <div class="stat-card danger">
+          <span class="stat-title">Suspended Accounts</span>
+          <span class="stat-value" id="stat-suspended-stores">-</span>
+          <span class="stat-desc">Deactivated client accounts</span>
+        </div>
+      </section>
+
+      <!-- Store Management Panel -->
+      <section class="management-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">
+            <svg style="width:24px;height:24px" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12,18H4H2V16H4V9C4,5.82 6.13,3.13 9,2.29V2A3,3 0 0,1 12,-1A3,3 0 0,1 15,2V2.29C17.87,3.13 20,5.82 20,9V16H22V18H14M12,20A2,2 0 0,1 10,22H14A2,2 0 0,1 12,20Z" />
+            </svg>
+            Registered Store Licenses
+          </h3>
+          
+          <div class="panel-actions">
+            <!-- Search -->
+            <div class="search-wrapper">
+              <svg class="search-icon" style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="search-bar" class="search-input" placeholder="Search by Store Name or Owner Email...">
+            </div>
+            
+            <!-- Plan Filter -->
+            <select id="filter-plan" class="filter-select">
+              <option value="all">All Plans</option>
+              <option value="starter">Starter</option>
+              <option value="professional">Professional</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+            
+            <!-- Status Filter -->
+            <select id="filter-status" class="filter-select">
+              <option value="all">All Statuses</option>
+              <option value="trial">Trial</option>
+              <option value="active">Active</option>
+              <option value="expired">Expired</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Store Details</th>
+                <th>Plan Type</th>
+                <th>Status</th>
+                <th>Trial End</th>
+                <th>License Expiry</th>
+                <th>Private Admin Notes</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="stores-table-body">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 40px 0;">
+                  <span style="color: var(--text-muted);">Syncing with Firestore...</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Management Drawer / Modal -->
+  <div class="modal-overlay" id="management-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-store-name">Manage Store License</h3>
+        <button class="close-btn" id="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-tabs">
+          <button class="tab-btn active" data-tab="tab-license">Activate License</button>
+          <button class="tab-btn" data-tab="tab-trial">Trial Config</button>
+          <button class="tab-btn" data-tab="tab-status">Suspend/Reactivate</button>
+          <button class="tab-btn" data-tab="tab-notes">Admin Notes</button>
+        </div>
+
+        <input type="hidden" id="modal-store-id">
+
+        <!-- Tab 1: Activate/Modify License -->
+        <div class="tab-pane active" id="tab-license">
+          <form id="license-form">
+            <div class="form-group">
+              <label>Select Plan Tier</label>
+              <select id="license-plan" class="form-control">
+                <option value="starter">Starter Plan (₹999/mo)</option>
+                <option value="professional" selected>Professional Plan (₹1,999/mo)</option>
+                <option value="enterprise">Enterprise Plan (₹3,999/mo)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Duration (Months)</label>
+              <select id="license-months" class="form-control">
+                <option value="1">1 Month</option>
+                <option value="3">3 Months</option>
+                <option value="6">6 Months</option>
+                <option value="12" selected>12 Months (1 Year)</option>
+                <option value="24">24 Months (2 Years)</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">WRITE ACTIVE LICENSE TO FIRESTORE</button>
+          </form>
+        </div>
+
+        <!-- Tab 2: Trial Extension -->
+        <div class="tab-pane" id="tab-trial">
+          <form id="trial-form">
+            <div class="form-group">
+              <label>Current Trial End Date</label>
+              <input type="text" id="trial-current-end" class="form-control" readonly style="opacity: 0.6;">
+            </div>
+            <div class="form-group">
+              <label>Add Days to Trial</label>
+              <input type="number" id="trial-extend-days" class="form-control" value="14" min="1">
+            </div>
+            <button type="submit" class="btn btn-primary" style="background-color: var(--warning);">EXTEND FREE TRIAL PERIOD</button>
+          </form>
+        </div>
+
+        <!-- Tab 3: Suspension / Reactivation -->
+        <div class="tab-pane" id="tab-status">
+          <div id="suspension-status-message" style="margin-bottom: 20px; font-weight: 600;"></div>
+          
+          <div id="suspend-panel">
+            <form id="suspend-form">
+              <div class="form-group">
+                <label>Reason for Suspension</label>
+                <textarea id="suspend-reason" class="form-control" rows="3" placeholder="Violated terms of service / Payment failed..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-danger" style="width: 100%;">IMMEDIATELY SUSPEND CLIENT STORE</button>
+            </form>
+          </div>
+          
+          <div id="reactivate-panel" style="display: none;">
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Reactivating will restore the account back to its previous billing/trial status depending on the expiry logs.</p>
+            <button id="reactivate-btn" class="btn btn-primary" style="background-color: var(--success); width: 100%;">REACTIVATE TENANT ACCOUNT</button>
+          </div>
+        </div>
+
+        <!-- Tab 4: Private Admin Notes -->
+        <div class="tab-pane" id="tab-notes">
+          <form id="notes-form">
+            <div class="form-group">
+              <label>Private Notes (Only Super Admins can see this)</label>
+              <textarea id="admin-notes-area" class="form-control" rows="6" placeholder="Client is opening a new branch. Spoke on phone. Payment processed via bank transfer..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">SAVE ADMINISTRATIVE NOTES</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast-notify">
+    <div id="toast-message">Task completed successfully!</div>
+  </div>
+
+  <!-- Firebase Script SDK Module -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { getFirestore, doc, collection, onSnapshot, updateDoc, setDoc, getDoc, Timestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    // Firebase Configurations
+    const firebaseConfig = {
+      apiKey: "AIzaSyAGKGk8v8vAMQRsRyaDIGiZHR0PeEfr0fA",
+      authDomain: "ghostgrid-billing.firebaseapp.com",
+      projectId: "ghostgrid-billing",
+      storageBucket: "ghostgrid-billing.firebasestorage.app",
+      messagingSenderId: "839955467579",
+      appId: "1:839955467579:web:d8dfbd097561f231e5fbae"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // DOM References
+    const authOverlay = document.getElementById('auth-overlay');
+    const dashboardLayout = document.getElementById('dashboard-layout');
+    const loginForm = document.getElementById('login-form');
+    const loginEmailInput = document.getElementById('login-email');
+    const loginPasswordInput = document.getElementById('login-password');
+    const authErrorDiv = document.getElementById('auth-error');
+    const logoutBtn = document.getElementById('logout-btn');
+    const adminEmailSpan = document.getElementById('admin-user-email');
+
+    // Modal References
+    const modal = document.getElementById('management-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const modalStoreName = document.getElementById('modal-store-name');
+    const modalStoreIdInput = document.getElementById('modal-store-id');
+
+    // Form elements in modal
+    const licenseForm = document.getElementById('license-form');
+    const licensePlan = document.getElementById('license-plan');
+    const licenseMonths = document.getElementById('license-months');
+
+    const trialForm = document.getElementById('trial-form');
+    const trialCurrentEnd = document.getElementById('trial-current-end');
+    const trialExtendDays = document.getElementById('trial-extend-days');
+
+    const suspendForm = document.getElementById('suspend-form');
+    const suspendReason = document.getElementById('suspend-reason');
+    const suspendPanel = document.getElementById('suspend-panel');
+    const reactivatePanel = document.getElementById('reactivate-panel');
+    const reactivateBtn = document.getElementById('reactivate-btn');
+    const suspensionStatusMessage = document.getElementById('suspension-status-message');
+
+    const notesForm = document.getElementById('notes-form');
+    const adminNotesArea = document.getElementById('admin-notes-area');
+
+    // UI elements
+    const searchBar = document.getElementById('search-bar');
+    const filterPlan = document.getElementById('filter-plan');
+    const filterStatus = document.getElementById('filter-status');
+    const storesTableBody = document.getElementById('stores-table-body');
+
+    // KPI Card Refs
+    const statTotalStores = document.getElementById('stat-total-stores');
+    const statMrr = document.getElementById('stat-mrr');
+    const statActiveLicenses = document.getElementById('stat-active-licenses');
+    const statTrialStores = document.getElementById('stat-trial-stores');
+    const statSuspendedStores = document.getElementById('stat-suspended-stores');
+
+    // Global Stores State Cache
+    let allStores = [];
+    let allNotes = {};
+
+    // 1. Authentication State Listener
+    onAuthStateChanged(auth, async (user) => {
+      if (user && user.email === 'admin@invoiceflow.com') {
+        // Authenticated as Super Admin
+        authOverlay.style.display = 'none';
+        dashboardLayout.style.display = 'flex';
+        adminEmailSpan.textContent = user.email;
+        showToast("Access Granted. Syncing database...", "success");
+        initDashboardSync();
+      } else {
+        // Logged out or unauthorized
+        if (user) {
+          authErrorDiv.textContent = "Unauthorized. Only 'admin@invoiceflow.com' has Super Admin privileges.";
+          await signOut(auth);
+        }
+        authOverlay.style.display = 'flex';
+        dashboardLayout.style.display = 'none';
+      }
+    });
+
+    // Login Form Submit handler
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      authErrorDiv.textContent = "";
+      const email = loginEmailInput.value.trim();
+      const password = loginPasswordInput.value;
+      const submitBtn = document.getElementById('login-submit-btn');
+
+      if (email !== 'admin@invoiceflow.com') {
+        authErrorDiv.textContent = "Access denied: Email must be admin@invoiceflow.com";
+        return;
+      }
+
+      submitBtn.textContent = "VERIFYING CREDENTIALS...";
+      submitBtn.disabled = true;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        console.error("Login failure", err);
+        authErrorDiv.textContent = "Invalid credentials. Please verify email and password.";
+      } finally {
+        submitBtn.textContent = "ACCESS COMMAND CENTER";
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Sign out Button handler
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        showToast("Logged out successfully", "success");
+      } catch (err) {
+        showToast("Logout failed", "error");
+      }
+    });
+
+    // Toast Notifications
+    function showToast(message, type = "success") {
+      const toast = document.getElementById('toast-notify');
+      const toastMsg = document.getElementById('toast-message');
+      
+      toast.className = `toast active ${type}`;
+      toastMsg.textContent = message;
+
+      setTimeout(() => {
+        toast.className = 'toast';
+      }, 3500);
+    }
+
+    // 2. Real-time Sync with Firestore
+    let unsubscribeStores = null;
+    let unsubscribeNotes = null;
+
+    function initDashboardSync() {
+      // Unsubscribe existing listeners
+      if (unsubscribeStores) unsubscribeStores();
+      if (unsubscribeNotes) unsubscribeNotes();
+
+      // Realtime listener for Stores collection
+      unsubscribeStores = onSnapshot(collection(db, "Stores"), (snapshot) => {
+        allStores = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // Sync Private Admin Notes (Realtime listener)
+        syncAdminNotes().then(() => {
+          updateMetrics();
+          renderStoresTable();
+        });
+      }, (err) => {
+        console.error("Firestore sync error", err);
+        showToast("Error syncing store details. Check security rules.", "error");
+      });
+    }
+
+    async function syncAdminNotes() {
+      try {
+        // Read the admin notes from the locked SuperAdmin/Notes/stores collection.
+        // Since we can't search subcollections easily without wildcards, let's fetch individual note files dynamically,
+        // or just retrieve them on snapshot/manually. For modular SDK, we can query the notes subcollection path.
+        // Wait, under our rules: "/SuperAdmin/{document=**}", we can check if notes doc exists.
+        // To keep it simple, we fetch the notes details manually for stores or query a global settings doc.
+        // Let's loop through stores and pull notes if needed, or query the collection.
+        // Actually, we can fetch all note documents in SuperAdmin/Notes/stores:
+        // Wait, in Modular SDK:
+        // const querySnapshot = await getDocs(collection(db, "SuperAdmin", "Notes", "stores"));
+        // This is perfect! Let's do that.
+        // But since getDocs might not be a direct collection route if we didn't specify it, let's wrap it securely in a try/catch:
+        allNotes = {};
+        for (let store of allStores) {
+          const noteDocRef = doc(db, "SuperAdmin", "Notes", "stores", store.id);
+          const noteDoc = await getDoc(noteDocRef);
+          if (noteDoc.exists()) {
+            allNotes[store.id] = noteDoc.data().notes || "";
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to fetch admin notes, maybe not initialized", e);
+      }
+    }
+
+    // Calculate MRR and other KPIs
+    function updateMetrics() {
+      statTotalStores.textContent = allStores.length;
+      
+      const active = allStores.filter(s => s.subscriptionStatus === 'active');
+      const trials = allStores.filter(s => s.subscriptionStatus === 'trial');
+      const suspended = allStores.filter(s => s.subscriptionStatus === 'suspended');
+
+      statActiveLicenses.textContent = active.length;
+      statTrialStores.textContent = trials.length;
+      statSuspendedStores.textContent = suspended.length;
+
+      // Estimate MRR (Starter: 999, Professional: 1999, Enterprise: 3999)
+      const mrr = active.reduce((sum, store) => {
+        if (store.planType === 'starter') return sum + 999;
+        if (store.planType === 'professional') return sum + 1999;
+        if (store.planType === 'enterprise') return sum + 3999;
+        return sum;
+      }, 0);
+
+      // Format currency
+      statMrr.textContent = "₹" + mrr.toLocaleString('en-IN');
+    }
+
+    // Render Table Row Elements
+    function renderStoresTable() {
+      const searchQuery = searchBar.value.toLowerCase().trim();
+      const planFilter = filterPlan.value;
+      const statusFilter = filterStatus.value;
+
+      storesTableBody.innerHTML = "";
+
+      const filtered = allStores.filter(store => {
+        // Search Filter
+        const nameMatch = store.name && store.name.toLowerCase().includes(searchQuery);
+        const idMatch = store.storeId && store.storeId.toLowerCase().includes(searchQuery);
+        const emailMatch = store.email && store.email.toLowerCase().includes(searchQuery);
+        const matchesSearch = nameMatch || idMatch || emailMatch || !searchQuery;
+
+        // Plan Filter
+        const matchesPlan = planFilter === 'all' || store.planType === planFilter;
+
+        // Status Filter
+        const matchesStatus = statusFilter === 'all' || store.subscriptionStatus === statusFilter;
+
+        return matchesSearch && matchesPlan && matchesStatus;
+      });
+
+      if (filtered.length === 0) {
+        storesTableBody.innerHTML = `
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-icon">📂</div>
+                <h3>No stores matched your filters</h3>
+                <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Try searching for a different name or email.</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      filtered.forEach(store => {
+        const tr = document.createElement('tr');
+        
+        // Expiry strings
+        const trialEndStr = formatTimestamp(store.trialEndDate);
+        const licenseExpiryStr = store.subscriptionExpiryDate ? formatTimestamp(store.subscriptionExpiryDate) : 'Not Subscribed';
+        
+        // Notes snippet
+        const privateNote = allNotes[store.storeId] || "";
+        const noteDisplay = privateNote 
+          ? `<div class="notes-display" onclick="openNotesModal('${store.storeId}')">${privateNote}</div>` 
+          : `<span style="color: var(--text-muted); font-style: italic; cursor: pointer;" onclick="openNotesModal('${store.storeId}')">+ Add Admin Note</span>`;
+
+        tr.innerHTML = `
+          <td>
+            <div class="store-name-cell">
+              <span style="font-weight: 600;">${store.name || 'Unnamed Store'}</span>
+              <span class="store-id-label">${store.storeId}</span>
+              <span style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Owner: ${store.email || 'N/A'}</span>
+            </div>
+          </td>
+          <td>
+            <span class="badge badge-${store.planType || 'starter'}">${store.planType || 'starter'}</span>
+          </td>
+          <td>
+            <span class="badge badge-${store.subscriptionStatus || 'trial'}">${store.subscriptionStatus || 'trial'}</span>
+          </td>
+          <td class="date-label">${trialEndStr}</td>
+          <td class="date-label" style="font-weight: 500;">${licenseExpiryStr}</td>
+          <td>${noteDisplay}</td>
+          <td style="text-align: right;">
+            <button class="btn btn-secondary manage-btn" data-id="${store.storeId}" style="padding: 6px 12px; font-size: 12px; border-radius: 8px;">
+              Manage License
+            </button>
+          </td>
+        `;
+
+        storesTableBody.appendChild(tr);
+      });
+
+      // Bind click handlers to manage buttons
+      document.querySelectorAll('.manage-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.target.getAttribute('data-id');
+          openManagementModal(id);
+        });
+      });
+    }
+
+    // Date Helper Formatting
+    function formatTimestamp(timestamp) {
+      if (!timestamp) return 'N/A';
+      // Handles Firestore Timestamp object or JS Date
+      const date = (timestamp.seconds) ? new Date(timestamp.seconds * 1000) : new Date(timestamp);
+      return date.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    // 3. Modal Navigation & Tabs logic
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabPanes.forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        const tabId = btn.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+
+    function openNotesModal(storeId) {
+      openManagementModal(storeId);
+      // Trigger click on notes tab
+      document.querySelector('[data-tab="tab-notes"]').click();
+    }
+    window.openNotesModal = openNotesModal; // Export to global scope for HTML onclick bindings
+
+    // Open Modal and Populate fields
+    async function openManagementModal(storeId) {
+      const store = allStores.find(s => s.storeId === storeId);
+      if (!store) return;
+
+      modalStoreName.textContent = `License Setup: ${store.name || 'Unnamed'}`;
+      modalStoreIdInput.value = storeId;
+      
+      // Populate Plan Form
+      licensePlan.value = store.planType || 'starter';
+      licenseMonths.value = '12'; // Default duration setup
+
+      // Populate Trial Form
+      trialCurrentEnd.value = formatTimestamp(store.trialEndDate);
+      trialExtendDays.value = '14';
+
+      // Populate Status panel
+      suspensionStatusMessage.innerHTML = `Current Status: <span class="badge badge-${store.subscriptionStatus}">${store.subscriptionStatus}</span>`;
+      
+      if (store.subscriptionStatus === 'suspended') {
+        suspendPanel.style.display = 'none';
+        reactivatePanel.style.display = 'block';
+        suspensionStatusMessage.innerHTML += `<p style="color: var(--danger); font-size: 13px; margin-top: 8px;">Suspension Reason: ${store.suspensionReason || 'No reason provided'}</p>`;
+      } else {
+        suspendPanel.style.display = 'block';
+        reactivatePanel.style.display = 'none';
+        suspendReason.value = "";
+      }
+
+      // Populate Notes
+      adminNotesArea.value = allNotes[storeId] || "";
+
+      // Default back to first tab
+      document.querySelector('[data-tab="tab-license"]').click();
+
+      // Show modal
+      modal.classList.add('active');
+    }
+
+    // 4. Action Submissions (Firestore Updates)
+    
+    // License Activation Form
+    licenseForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const storeId = modalStoreIdInput.value;
+      const plan = licensePlan.value;
+      const months = parseInt(licenseMonths.value);
+      
+      const docRef = doc(db, "Stores", storeId);
+      const now = new Date();
+      const expiry = new Date();
+      expiry.setMonth(now.getMonth() + months);
+
+      // Define limits based on plan
+      let maxStaff = 2;
+      let maxProducts = 100;
+      let features = ["pdf"];
+
+      if (plan === 'starter') {
+        maxStaff = 2;
+        maxProducts = 100;
+        features = ["pdf"];
+      } else if (plan === 'professional') {
+        maxStaff = 5;
+        maxProducts = 500;
+        features = ["analytics", "pdf"];
+      } else if (plan === 'enterprise') {
+        maxStaff = 99999;
+        maxProducts = 99999;
+        features = ["analytics", "pdf"];
+      }
+
+      try {
+        await updateDoc(docRef, {
+          subscriptionStatus: "active",
+          planType: plan,
+          maxStaffAccounts: maxStaff,
+          maxProductsAllowed: maxProducts,
+          featuresEnabled: features,
+          subscriptionStartDate: Timestamp.fromDate(now),
+          subscriptionExpiryDate: Timestamp.fromDate(expiry),
+          lastPaymentDate: Timestamp.fromDate(now),
+          paymentMethod: "Admin Override",
+          suspensionReason: null,
+          updatedAt: Timestamp.fromDate(now)
+        });
+
+        showToast("License Activated successfully!", "success");
+        modal.classList.remove('active');
+      } catch (err) {
+        console.error(err);
+        showToast("Error updating license details", "error");
+      }
+    });
+
+    // Trial Extension Form
+    trialForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const storeId = modalStoreIdInput.value;
+      const days = parseInt(trialExtendDays.value);
+      const store = allStores.find(s => s.storeId === storeId);
+      if (!store) return;
+
+      const docRef = doc(db, "Stores", storeId);
+      
+      // Calculate new trial date based on current trialEndDate
+      const currentEndMs = (store.trialEndDate.seconds) ? store.trialEndDate.seconds * 1000 : store.trialEndDate;
+      const newEnd = new Date(currentEndMs + (days * 24 * 60 * 60 * 1000));
+
+      try {
+        await updateDoc(docRef, {
+          subscriptionStatus: "trial",
+          trialEndDate: Timestamp.fromDate(newEnd),
+          suspensionReason: null,
+          updatedAt: Timestamp.fromDate(new Date())
+        });
+
+        showToast(`Trial extended by ${days} days!`, "success");
+        modal.classList.remove('active');
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to extend trial period", "error");
+      }
+    });
+
+    // Suspend Form
+    suspendForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const storeId = modalStoreIdInput.value;
+      const reason = suspendReason.value.trim();
+      const docRef = doc(db, "Stores", storeId);
+
+      try {
+        await updateDoc(docRef, {
+          subscriptionStatus: "suspended",
+          suspensionReason: reason,
+          updatedAt: Timestamp.fromDate(new Date())
+        });
+
+        showToast("Store Account Suspended successfully", "error");
+        modal.classList.remove('active');
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to suspend account", "error");
+      }
+    });
+
+    // Reactivate Button Click
+    reactivateBtn.addEventListener('click', async () => {
+      const storeId = modalStoreIdInput.value;
+      const store = allStores.find(s => s.storeId === storeId);
+      if (!store) return;
+
+      const docRef = doc(db, "Stores", storeId);
+      const currentTime = Date.now();
+
+      // Determine proper restored state
+      let restoredStatus = "active";
+      
+      const trialEndMs = (store.trialEndDate.seconds) ? store.trialEndDate.seconds * 1000 : store.trialEndDate;
+      const expiryEndMs = store.subscriptionExpiryDate ? ((store.subscriptionExpiryDate.seconds) ? store.subscriptionExpiryDate.seconds * 1000 : store.subscriptionExpiryDate) : null;
+
+      if (expiryEndMs && expiryEndMs < currentTime) {
+        restoredStatus = "expired";
+      } else if (!expiryEndMs && trialEndMs < currentTime) {
+        restoredStatus = "expired";
+      } else if (!expiryEndMs && trialEndMs >= currentTime) {
+        restoredStatus = "trial";
+      }
+
+      try {
+        await updateDoc(docRef, {
+          subscriptionStatus: restoredStatus,
+          suspensionReason: null,
+          updatedAt: Timestamp.fromDate(new Date())
+        });
+
+        showToast(`Account status restored to: ${restoredStatus}`, "success");
+        modal.classList.remove('active');
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to reactivate store account", "error");
+      }
+    });
+
+    // Administrative notes Form
+    notesForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const storeId = modalStoreIdInput.value;
+      const notesText = adminNotesArea.value.trim();
+
+      // Store private notes securely in SuperAdmin collection under notes/stores/{storeId}
+      const noteDocRef = doc(db, "SuperAdmin", "Notes", "stores", storeId);
+
+      try {
+        await setDoc(noteDocRef, {
+          storeId: storeId,
+          notes: notesText,
+          updatedAt: Timestamp.fromDate(new Date())
+        }, { merge: true });
+
+        // Update local state copy to immediately reflect in UI
+        allNotes[storeId] = notesText;
+        renderStoresTable();
+
+        showToast("Private Admin Notes saved", "success");
+        modal.classList.remove('active');
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to write notes. Ensure you are logged in as admin@invoiceflow.com", "error");
+      }
+    });
+
+    // UI Listeners (Search and filter controls)
+    searchBar.addEventListener('input', renderStoresTable);
+    filterPlan.addEventListener('change', renderStoresTable);
+    filterStatus.addEventListener('change', renderStoresTable);
+
+  </script>
+</body>
+</html>

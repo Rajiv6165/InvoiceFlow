@@ -15,9 +15,12 @@ class BillingApplication : Application() {
         super.onCreate()
         
         // Initialize Timber for logging (only in debug builds)
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.ENABLE_LOGGING) {
             Timber.plant(Timber.DebugTree())
         }
+        
+        // Enqueue periodic background database sync
+        com.invoiceflow.billing.util.BackgroundSyncWorker.enqueuePeriodicSync(this)
         
         Timber.d("InvoiceFlow Application started")
     }

@@ -1,5 +1,9 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.invoiceflow.billing.ui.screens.pos
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,15 +15,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import com.invoiceflow.billing.model.CartItem
+import com.invoiceflow.billing.ui.theme.GradientStart
+import com.invoiceflow.billing.ui.theme.GradientEnd
 import java.text.NumberFormat
 
 @Composable
@@ -38,17 +46,28 @@ fun CartBottomSheet(
         currency = java.util.Currency.getInstance("INR")
     }
     
-    // Modal Bottom Sheet
+    // Modal Bottom Sheet with custom shape (28dp top corners)
     ModalBottomSheet(
         onDismissRequest = { },
         containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = null,
-        properties = DialogProperties(dismissOnBackPress = false)
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 12.dp)
+                    .width(40.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+            )
+        }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp)
         ) {
             // Header
             Row(
@@ -57,56 +76,60 @@ fun CartBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Shopping Cart (${cartItems.size} items)",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    text = "Cart (${cartItems.sumOf { it.quantity }} items)",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
             }
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Cart Items
+            // Cart Items List
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 250.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .heightIn(max = 280.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(cartItems, key = { it.product.productId }) { cartItem ->
-                    CartItemRow(
-                        cartItem = cartItem,
-                        priceFormat = priceFormat,
-                        onIncrement = { onIncrementQuantity(cartItem.product.productId) },
-                        onDecrement = { onDecrementQuantity(cartItem.product.productId) },
-                        onRemove = { onRemoveFromCart(cartItem.product.productId) }
-                    )
+                    AnimatedVisibility(
+                        visible = true,
+                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                    ) {
+                        CartItemRow(
+                            cartItem = cartItem,
+                            priceFormat = priceFormat,
+                            onIncrement = { onIncrementQuantity(cartItem.product.productId) },
+                            onDecrement = { onDecrementQuantity(cartItem.product.productId) },
+                            onRemove = { onRemoveFromCart(cartItem.product.productId) }
+                        )
+                    }
                 }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+            Divider(color = MaterialTheme.colorScheme.outlineVariant)
+            Spacer(modifier = Modifier.height(20.dp))
             
-            Divider()
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Totals
+            // Totals with Animated Transitions on modifications
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Subtotal:",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = priceFormat.format(subtotal),
+                        text = "Subtotal",
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
+                    AnimatedContent(targetState = subtotal, label = "subtotal_anim") { total ->
+                        Text(
+                            text = priceFormat.format(total),
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                        )
+                    }
                 }
                 
                 Row(
@@ -114,64 +137,84 @@ fun CartBottomSheet(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Tax (GST):",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = priceFormat.format(taxAmount),
+                        text = "GST (18% included)",
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
+                    AnimatedContent(targetState = taxAmount, label = "tax_anim") { tax ->
+                        Text(
+                            text = priceFormat.format(tax),
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                        )
+                    }
                 }
                 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Grand Total:",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        text = "Grand Total",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
-                    Text(
-                        text = priceFormat.format(grandTotal),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    AnimatedContent(targetState = grandTotal, label = "grandtotal_anim") { total ->
+                        Text(
+                            text = priceFormat.format(total),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        )
+                    }
                 }
             }
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Checkout Button
-            Button(
-                onClick = onCheckoutClick,
+            // Checkout button with brand gradient background
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                enabled = !isCheckingOut && cartItems.isNotEmpty()
+                    .height(56.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(GradientStart, GradientEnd)
+                        )
+                    )
+                    .clickable(enabled = !isCheckingOut && cartItems.isNotEmpty()) {
+                        onCheckoutClick()
+                    },
+                contentAlignment = Alignment.Center
             ) {
                 if (isCheckingOut) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = Color.White,
                         strokeWidth = 2.dp
                     )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text("Processing...")
                 } else {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = null
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Proceed to Checkout",
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Proceed to Checkout",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -187,9 +230,12 @@ private fun CartItemRow(
     onRemove: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(2.dp, RoundedCornerShape(12.dp)),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         )
     ) {
         Row(
@@ -205,81 +251,77 @@ private fun CartItemRow(
             ) {
                 Text(
                     text = cartItem.product.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "${priceFormat.format(cartItem.product.price)} × ${cartItem.quantity}",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
-            // Quantity Controls
+            // Quantity controls and remove button
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Decrement
-                IconButton(
-                    onClick = onDecrement,
+                // Adjust quantity UI
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.outline,
-                            RoundedCornerShape(8.dp)
-                        ),
-                    contentPadding = PaddingValues(0.dp)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                        .padding(4.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Remove,
-                        contentDescription = "Decrease quantity",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurface
+                    IconButton(
+                        onClick = onDecrement,
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Remove,
+                            contentDescription = "Decrease quantity",
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                    
+                    Text(
+                        text = cartItem.quantity.toString(),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.width(20.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
+                    
+                    IconButton(
+                        onClick = onIncrement,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Increase quantity",
+                            modifier = Modifier.size(14.dp),
+                            tint = Color.White
+                        )
+                    }
                 }
                 
-                // Quantity Display
-                Text(
-                    text = cartItem.quantity.toString(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.width(24.dp),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-                
-                // Increment
                 IconButton(
-                    onClick = onIncrement,
+                    onClick = onRemove,
                     modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            MaterialTheme.colorScheme.primary,
-                            RoundedCornerShape(8.dp)
-                        ),
-                    contentPadding = PaddingValues(0.dp)
+                        .size(36.dp)
+                        .background(MaterialTheme.colorScheme.errorContainer, CircleShape)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Increase quantity",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = "Remove item",
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.size(16.dp)
                     )
                 }
-            }
-            
-            // Remove Button
-            IconButton(onClick = onRemove) {
-                Icon(
-                    imageVector = Icons.Default.Clear,
-                    contentDescription = "Remove item",
-                    tint = MaterialTheme.colorScheme.error
-                )
             }
         }
     }

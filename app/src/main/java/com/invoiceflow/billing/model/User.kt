@@ -17,6 +17,8 @@ data class User(
     val phone: String = "",
     val createdAt: Timestamp = Timestamp.now(),
     val lastLoginAt: Timestamp? = null,
+    val lastSeenAt: Timestamp? = null,
+    val shift: String = "Any",
     val isActive: Boolean = true
 ) {
     /**
@@ -32,6 +34,8 @@ data class User(
             "phone" to phone,
             "createdAt" to createdAt,
             "lastLoginAt" to lastLoginAt,
+            "lastSeenAt" to lastSeenAt,
+            "shift" to shift,
             "isActive" to isActive
         )
     }

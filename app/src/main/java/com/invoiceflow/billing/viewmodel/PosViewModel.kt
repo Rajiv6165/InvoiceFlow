@@ -1,5 +1,6 @@
 package com.invoiceflow.billing.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.invoiceflow.billing.model.CartItem
 import com.invoiceflow.billing.model.Invoice
@@ -45,7 +46,8 @@ data class PosUiState(
 class PosViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val authRepository: AuthRepository,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val activityLogRepository: com.invoiceflow.billing.repository.ActivityLogRepository
 ) : BaseViewModel() {
     
     companion object {
@@ -303,6 +305,25 @@ class PosViewModel @Inject constructor(
                         )
                     }
                 }.await()
+                
+                // Log event
+                try {
+                    activityLogRepository.logEvent(
+                        storeId = currentStoreId,
+                        userId = currentUserId,
+                        userName = currentUserName,
+                        userEmail = "",
+                        actionType = "INVOICE_CREATED",
+                        details = mapOf(
+                            "invoiceId" to finalInvoice.invoiceId,
+                            "invoiceNumber" to finalInvoice.invoiceNumber,
+                            "grandTotal" to finalInvoice.grandTotal.toString(),
+                            "itemsCount" to finalInvoice.items.sumOf { it.quantity }.toString()
+                        )
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to log invoice creation event", e)
+                }
                 
                 // Success!
                 _uiState.value = currentState.copy(

@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:839955467579:android:50abb79779a54911e5fb1e",
         "android_client_info": {
-          "package_name": "com.ghostgrid.billing"
+          "package_name": "com.invoiceflow.billing"
         }
       },
       "oauth_client": [],

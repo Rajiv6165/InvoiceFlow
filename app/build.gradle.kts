@@ -6,6 +6,13 @@ plugins {
     kotlin("kapt")
 }
 
+val localProperties = java.util.Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}
+
 android {
     namespace = "com.invoiceflow.billing"
     compileSdk = 34
@@ -23,13 +30,31 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            // Loaded from local.properties for security
+            storeFile = file(localProperties.getProperty("KEYSTORE_PATH") ?: "debug.keystore")
+            storePassword = localProperties.getProperty("KEYSTORE_PASSWORD") ?: ""
+            keyAlias = localProperties.getProperty("KEY_ALIAS") ?: ""
+            keyPassword = localProperties.getProperty("KEY_PASSWORD") ?: ""
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("boolean", "ENABLE_LOGGING", "false")
+        }
+        debug {
+            isDebuggable = true
+            buildConfigField("boolean", "ENABLE_LOGGING", "true")
         }
     }
     
@@ -44,6 +69,7 @@ android {
     
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     
     composeOptions {
@@ -111,6 +137,19 @@ dependencies {
     
     // PDF Generation
     implementation("androidx.print:print:1.0.0")
+    
+    // SplashScreen API
+    implementation("androidx.core:core-splashscreen:1.0.1")
+    
+    // Coil for Image Caching
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    
+    // Paging 3
+    implementation("androidx.paging:paging-runtime-ktx:3.2.1")
+    implementation("androidx.paging:paging-compose:3.2.1")
+    
+    // WorkManager for background tasks
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
     
     // Testing
     testImplementation("junit:junit:4.13.2")

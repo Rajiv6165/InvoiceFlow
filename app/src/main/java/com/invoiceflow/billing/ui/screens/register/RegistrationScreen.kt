@@ -1,6 +1,8 @@
 package com.invoiceflow.billing.ui.screens.register
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -293,7 +295,7 @@ private fun RegistrationContent(
                 Spacer(modifier = Modifier.width(16.dp))
             }
             Text(
-                text = if (uiState.isLoading) "Creating Account..." : "Create Account",
+                text = if (uiState.isLoading) "Creating Account..." else "Create Account",
                 style = MaterialTheme.typography.titleMedium
             )
         }

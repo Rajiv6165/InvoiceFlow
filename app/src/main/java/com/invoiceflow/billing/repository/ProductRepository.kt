@@ -30,7 +30,7 @@ class ProductRepository @Inject constructor(
      */
     fun getProductsByStoreId(storeId: String): Flow<Result<List<Product>>> = callbackFlow {
         try {
-            emit(Result.Loading)
+            trySend(Result.Loading)
             
             val listenerRegistration = firestore.collection(Product.COLLECTION_NAME)
                 .whereEqualTo("storeId", storeId)
@@ -62,7 +62,7 @@ class ProductRepository @Inject constructor(
      */
     fun searchProducts(storeId: String, query: String): Flow<Result<List<Product>>> = callbackFlow {
         try {
-            emit(Result.Loading)
+            trySend(Result.Loading)
             
             // Case-insensitive search by name
             val lowerCaseQuery = query.lowercase()
@@ -279,7 +279,7 @@ class ProductRepository @Inject constructor(
      */
     fun getLowStockProducts(storeId: String): Flow<Result<List<Product>>> = callbackFlow {
         try {
-            emit(Result.Loading)
+            trySend(Result.Loading)
             
             val listenerRegistration = firestore.collection(Product.COLLECTION_NAME)
                 .whereEqualTo("storeId", storeId)

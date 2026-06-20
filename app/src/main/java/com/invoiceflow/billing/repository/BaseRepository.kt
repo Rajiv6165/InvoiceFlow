@@ -2,6 +2,7 @@ package com.invoiceflow.billing.repository
 
 import com.invoiceflow.billing.util.Result
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 /**
  * Base repository providing common Firebase operations

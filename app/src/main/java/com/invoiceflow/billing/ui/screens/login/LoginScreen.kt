@@ -222,7 +222,7 @@ private fun LoginContent(
                 Spacer(modifier = Modifier.width(16.dp))
             }
             Text(
-                text = if (uiState.isLoading) "Logging in..." : "Login",
+                text = if (uiState.isLoading) "Logging in..." else "Login",
                 style = MaterialTheme.typography.titleMedium
             )
         }

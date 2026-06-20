@@ -54,5 +54,5 @@ sealed class Result<out T> {
  * Extension function to run only if result is not loading
  */
 inline fun <T> Result<T>.ifNotLoading(action: (Result<T>) -> Unit) {
-    if (this !is Loading) action(this)
+    if (this !is Result.Loading) action(this)
 }
